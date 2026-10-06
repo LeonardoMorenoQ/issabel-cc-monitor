@@ -1,0 +1,20 @@
+# secrets & local state
+.env
+*.db
+*.sqlite
+*.sqlite3
+demo/fixture.json
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# node / dashboard
+node_modules/
+dashboard/dist/
