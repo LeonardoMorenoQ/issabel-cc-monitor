@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 
+import pytest
 import sqlglot
 
 from ccmon.config import Settings
@@ -77,3 +78,35 @@ def test_queue_log_aggregation_has_time_bounds():
 def test_sla_window_is_parametrized_not_hardcoded():
     assert "%(sla_seconds)s" in queue_log.SQL_QUEUE_STATS
     assert "%(sla_seconds)s" in queue_log.SQL_QUEUE_STATS_BY_BUCKET
+
+
+def _all_sql() -> list[str]:
+    modules = (queues, agents, queue_log, cdr, campaigns, health)
+    constants = [
+        getattr(mod, name)
+        for mod in modules
+        for name in dir(mod)
+        if name.startswith("SQL_") and "{bucket_expr}" not in getattr(mod, name)
+    ]
+    dynamic = [
+        campaigns.build_campaign_query("name", "status", "start_time"),
+        campaigns.build_campaign_query("name", None, None),
+        campaigns.build_campaign_report_query("start_time"),
+        queue_log.SQL_QUEUE_STATS_BY_BUCKET.replace("{bucket_expr}", queue_log.BUCKET_HOUR),
+        queue_log.SQL_QUEUE_STATS_BY_BUCKET.replace("{bucket_expr}", queue_log.BUCKET_DAY),
+    ]
+    return constants + dynamic
+
+
+def test_sql_survives_pymysql_percent_substitution():
+    """PyMySQL runs `query % args` on EVERY executed statement (even with an
+    empty params dict). A literal '%' that is not doubled crashes at runtime
+    with "unsupported format character" — invisible to parse-level tests.
+    """
+    for sql in _all_sql():
+        filled = render(sql, SETTINGS)
+        values = {m: "1" for m in re.findall(r"%\(([a-z0-9_]+)\)s", filled)}
+        try:
+            filled % values
+        except (ValueError, KeyError) as exc:
+            pytest.fail(f"SQL breaks under PyMySQL %-substitution: {exc}\n{sql[:200]}")

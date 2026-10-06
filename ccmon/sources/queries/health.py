@@ -15,7 +15,7 @@ FROM {asterisk}.ps_contacts
 # chan_sip legacy (Asterisk <= 13 / Issabel 4) — documented as untested for v1.
 SQL_SIP_PEERS = """
 SELECT name AS peer,
-       CASE WHEN status LIKE 'OK%' THEN 'registered' ELSE 'unregistered' END AS status,
+       CASE WHEN status LIKE 'OK%%' THEN 'registered' ELSE 'unregistered' END AS status,
        COALESCE(status, '') AS detail
 FROM {asterisk}.sippeers
 """

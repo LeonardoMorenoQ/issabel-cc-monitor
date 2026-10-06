@@ -104,6 +104,9 @@ def test_mysql_source_live_snapshot():
         campaigns = {row["campaign"]: row for row in snap["campaigns"]}
         assert campaigns["Promo Dialer"]["calls_today"] == 2  # today's `calls` rows
 
+        trunks = {row["peer"]: row for row in snap["trunks"]}
+        assert trunks["siptrunk"]["status"] == "registered"  # SQL_SIP_PEERS path
+
         stats = {r["queue"]: r for r in source.rolling_queue_stats(15, 20)}
         assert stats["800"]["handled_rolling"] == 3
 

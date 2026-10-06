@@ -22,7 +22,7 @@ def build_campaign_query(name_col: str, status_col: str | None, calls_time_col: 
             "SELECT COUNT(*) FROM {call_center}.calls x "
             "WHERE x.id_campaign = c.id AND COALESCE(x." + calls_time_col + ", '') >= CURDATE() "
             "AND (CAST(NULLIF(x.duration, '') AS UNSIGNED) > 0 "
-            "     OR x.status LIKE '%ANSWER%' OR x.status LIKE '%Success%')"
+            "     OR x.status LIKE '%%ANSWER%%' OR x.status LIKE '%%Success%%')"
         )
     else:
         sub, sub_conn = "SELECT 0", "SELECT 0"
@@ -40,3 +40,21 @@ FROM {call_center}.campaign_entry
 WHERE datetime_init >= CURDATE()
 GROUP BY id_campaign
 """
+
+
+def build_campaign_report_query(time_col: str) -> str:
+    """Per-campaign call/connected totals for a date range (probed time column).
+
+    Literal percent signs are doubled: PyMySQL runs %-substitution on every
+    executed statement, so '%%ANSWER%%' reaches MySQL as '%ANSWER%'.
+    """
+    return (
+        "SELECT camp.name AS campaign, COUNT(*) AS calls, "
+        "SUM(CASE WHEN CAST(NULLIF(c.duration, '') AS UNSIGNED) > 0 "
+        "          OR c.status LIKE '%%ANSWER%%' THEN 1 ELSE 0 END) AS connected "
+        "FROM {call_center}.calls c "
+        "JOIN {call_center}.campaign camp ON camp.id = c.id_campaign "
+        "WHERE COALESCE(c." + time_col + ", '') >= %(t0)s "
+        "  AND COALESCE(c." + time_col + ", '') < %(t1)s "
+        "GROUP BY camp.name ORDER BY calls DESC LIMIT %(lim)s"
+    )

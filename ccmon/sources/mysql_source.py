@@ -447,16 +447,7 @@ class MysqlSource:
         if not (caps.source_ok and caps.campaigns and caps.campaign_calls_time_col):
             return []
         time_col = caps.campaign_calls_time_col
-        sql = (
-            "SELECT camp.name AS campaign, COUNT(*) AS calls, "
-            "SUM(CASE WHEN CAST(NULLIF(c.duration, '') AS UNSIGNED) > 0 "
-            "          OR c.status LIKE '%ANSWER%' THEN 1 ELSE 0 END) AS connected "
-            "FROM {call_center}.calls c "
-            "JOIN {call_center}.campaign camp ON camp.id = c.id_campaign "
-            "WHERE COALESCE(c." + time_col + ", '') >= %(t0)s "
-            "  AND COALESCE(c." + time_col + ", '') < %(t1)s "
-            "GROUP BY camp.name ORDER BY calls DESC LIMIT %(lim)s"
-        )
+        sql = q.campaigns.build_campaign_report_query(time_col)
         rows = self._reader.query(
             render(sql, self._settings),
             {

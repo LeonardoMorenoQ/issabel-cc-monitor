@@ -80,6 +80,12 @@ INSERT INTO queue_member (membername, name, queue_name, paused) VALUES
   ('103', 'PJSIP/103', '800', 1),
   ('104', 'PJSIP/104', '801', 0);
 
+CREATE TABLE sippeers (
+  name   VARCHAR(128) NOT NULL,
+  status VARCHAR(64)  DEFAULT ''
+);
+INSERT INTO sippeers (name, status) VALUES ('siptrunk', 'OK (valid)');
+
 -- ------------------------------------------------------------------ call_center
 USE `call_center`;
 CREATE TABLE agent (
