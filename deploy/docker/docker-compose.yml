@@ -1,0 +1,55 @@
+# Optional container stack (secondary artifact; primary install is bare systemd).
+# From the repository root:
+#   docker compose -f deploy/docker/docker-compose.yml up -d
+# Read the .env file you provide; never commit it.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ccmon
+      POSTGRES_USER: ccmon
+      POSTGRES_PASSWORD: ${CCMON_DB_PASSWORD:?set CCMON_DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ccmon"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_MODE: ${APP_MODE:-production}
+      APP_HOST: 0.0.0.0
+      APP_PORT: "8080"
+      DATABASE_URL: postgresql+psycopg://ccmon:${CCMON_DB_PASSWORD:?}@db:5432/ccmon
+      ISSABEL_DB_HOST: ${ISSABEL_DB_HOST:-host.docker.internal}
+      ISSABEL_DB_PORT: ${ISSABEL_DB_PORT:-3306}
+      ISSABEL_DB_USER: ${ISSABEL_DB_USER:-ccmon_reader}
+      ISSABEL_DB_PASSWORD: ${ISSABEL_DB_PASSWORD:-}
+      AMI_ENABLED: ${AMI_ENABLED:-false}
+      AMI_HOST: ${AMI_HOST:-host.docker.internal}
+      AMI_USERNAME: ${AMI_USERNAME:-ccmon_read}
+      AMI_SECRET: ${AMI_SECRET:-}
+      TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-false}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      OPENAPI_ENABLED: ${OPENAPI_ENABLED:-false}
+    ports:
+      - "127.0.0.1:8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

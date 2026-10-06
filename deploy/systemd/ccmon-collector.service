@@ -1,0 +1,46 @@
+[Unit]
+Description=ccmon collector - snapshots, rollups, alert evaluation
+Documentation=https://github.com/your-org/issabel-cc-monitor
+After=network-online.target postgresql.service
+Wants=network-online.target
+PartOf=ccmon.target
+
+[Service]
+Type=simple
+User=ccmon
+Group=ccmon
+WorkingDirectory=/opt/ccmon
+EnvironmentFile=/etc/ccmon/ccmon.env
+ExecStart=/opt/ccmon/.venv/bin/ccmon collect
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+
+# --- hardening -------------------------------------------------------------
+StateDirectory=ccmon
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/ccmon
+
+[Install]
+WantedBy=multi-user.target
