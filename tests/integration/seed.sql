@@ -166,3 +166,12 @@ VALUES
   (1, NOW() - INTERVAL 10 MINUTE, '30', 'ANSWER'),
   (1, NOW() - INTERVAL 20 MINUTE, '0',  'NOANSWER'),
   (1, NOW() - INTERVAL 2 DAY,     '45', 'ANSWER');
+
+-- --------------------------------------------------------------------- grants
+-- MARIADB_USER only receives privileges on MARIADB_DATABASE; the test user
+-- needs SELECT on the two databases this file creates as well (the app user
+-- in production is SELECT-only; this test user is ALL on test DBs only).
+GRANT ALL PRIVILEGES ON `asteriskcdrdb`.* TO 'ccmon_it'@'%';
+GRANT ALL PRIVILEGES ON `asterisk`.*      TO 'ccmon_it'@'%';
+GRANT ALL PRIVILEGES ON `call_center`.*   TO 'ccmon_it'@'%';
+FLUSH PRIVILEGES;

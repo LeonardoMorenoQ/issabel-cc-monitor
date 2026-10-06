@@ -81,7 +81,7 @@ def test_reader_session_is_read_only():
     reader = MysqlReader(settings)
     with reader.connection() as conn:
         with conn.cursor() as cur:
-            with pytest.raises(pymysql.err.MySQLException):
+            with pytest.raises(pymysql.err.MySQLError):
                 cur.execute("CREATE TABLE ccmon_should_not_exist (id INT)")
 
 
