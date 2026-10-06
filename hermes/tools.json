@@ -1,0 +1,79 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "ccmon_queue_health",
+      "description": "Get the current health of all call queues (waiting, active, agents free, SLA%) with a plain-language summary. Use when the user asks how the queues are doing, which queue is overloaded, or whether SLA is at risk. Returns a 'stale' flag — if true, mention that the collector may be down.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ccmon_agents_paused",
+      "description": "List agents who have been paused for at least min_minutes, longest first, with a plain-language summary. Use for questions like 'who has been on break too long?' or 'list paused agents'.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "min_minutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1440,
+            "default": 15,
+            "description": "Minimum pause duration in minutes (default 15)."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ccmon_abandoned_calls",
+      "description": "Get abandoned-call statistics for a date (default: today): total, breakdown by queue, average wait, and a plain-language summary. Use for questions like 'how many calls did we lose today/yesterday?'",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD date; defaults to today. Must not be in the future."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ccmon_report_summary",
+      "description": "Get a traffic summary for a date range (max 92 days, no future dates): offered, answered, abandoned %, average wait and SLA%. Use for questions like 'how did we do last week?' or 'what was the SLA in September?'.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "date_from": {
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD start date (inclusive)."
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD end date (inclusive); defaults to today."
+          }
+        },
+        "required": ["date_from"],
+        "additionalProperties": false
+      }
+    }
+  }
+]

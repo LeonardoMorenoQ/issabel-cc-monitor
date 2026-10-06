@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    name: Lint + unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - run: pip install -r requirements.lock
+      - run: pip install -e .
+      - run: ruff check ccmon tests
+      - run: pytest
+
+  dashboard:
+    name: Dashboard typecheck + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      - run: npm run build   # tsc --noEmit && vite build
+
+  integration:
+    name: Real MariaDB + PostgreSQL integration
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: ccmon_it_root
+          MARIADB_DATABASE: asteriskcdrdb
+          MARIADB_USER: ccmon_it
+          MARIADB_PASSWORD: ccmon_it
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s --health-timeout 5s --health-retries 24
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ccmon_it
+          POSTGRES_USER: ccmon_it
+          POSTGRES_PASSWORD: ccmon_it
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ccmon_it"
+          --health-interval 5s --health-timeout 3s --health-retries 24
+    env:
+      CCMON_IT_MYSQL_URL: mysql://ccmon_it:ccmon_it@127.0.0.1:3306
+      CCMON_IT_PG_URL: postgresql+psycopg://ccmon_it:ccmon_it@127.0.0.1:5432/ccmon_it
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - run: pip install -r requirements.lock
+      - run: pip install -e .
+      - name: Fail if integration URLs are missing (no silently-skipped job)
+        run: test -n "$CCMON_IT_MYSQL_URL" && test -n "$CCMON_IT_PG_URL"
+      - name: Load seeded Issabel-like schema
+        run: |
+          cid=$(docker ps -qf ancestor=mariadb:10.6)
+          test -n "$cid"
+          docker exec -i "$cid" mysql -uroot -pccmon_it_root < tests/integration/seed.sql
+      - run: pytest tests/integration -q

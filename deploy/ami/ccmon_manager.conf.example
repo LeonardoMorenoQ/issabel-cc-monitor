@@ -1,0 +1,22 @@
+; =============================================================================
+; ccmon read-only AMI user — Asterisk 16/18 (Issabel 5)
+;
+; Install: append to /etc/asterisk/manager.conf and `reload manager`.
+; ccmon only ever sends: Login, QueueStatus, CoreShowChannels,
+; PJSIPShowEndpoints / SIPshowpeers, Logoff. No write privileges are granted,
+; no originate, no command execution. Keep it on loopback.
+; =============================================================================
+
+[ccmon_read]
+type = user
+secret = CHANGE_ME_AMI_SECRET
+; Read classes needed:
+;   agent     -> QueueStatus (queue/membership/paused state)
+;   call      -> CoreShowChannels (live channels)
+;   system    -> PJSIPShowEndpoints / SIPshowpeers (trunk registration)
+;   reporting -> associated response events
+read = system,call,agent,reporting
+; NO write privileges at all:
+write =
+permit = 127.0.0.1/255.255.255.255
+deny  = 0.0.0.0/0.0.0.0

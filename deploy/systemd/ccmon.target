@@ -1,0 +1,6 @@
+[Unit]
+Description=ccmon call-center monitor (API + collector)
+Documentation=https://github.com/your-org/issabel-cc-monitor
+
+[Install]
+WantedBy=multi-user.target
