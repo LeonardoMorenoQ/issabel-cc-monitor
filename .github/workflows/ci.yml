@@ -17,6 +17,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.lock
       - run: pip install -r requirements.lock
+      - run: pip install -e .
       - run: ruff check ccmon tests
       - run: pytest
 
@@ -72,6 +73,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.lock
       - run: pip install -r requirements.lock
+      - run: pip install -e .
       - name: Fail if integration URLs are missing (no silently-skipped job)
         run: test -n "$CCMON_IT_MYSQL_URL" && test -n "$CCMON_IT_PG_URL"
       - name: Load seeded Issabel-like schema
