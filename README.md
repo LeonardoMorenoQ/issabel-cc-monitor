@@ -63,6 +63,7 @@ Ubuntu/Debian operators: [docs/install-ubuntu-debian.md](docs/install-ubuntu-deb
 | --- | --- |
 | [docs/architecture.md](docs/architecture.md) | Components, data flow, collector loops, repo layout |
 | [docs/install-issabel5.md](docs/install-issabel5.md) | Production install on Issabel 5 |
+| [docs/install-live-pbx-runbook.md](docs/install-live-pbx-runbook.md) | Gated step-by-step runbook for a live PBX (verify after every step) |
 | [docs/install-ubuntu-debian.md](docs/install-ubuntu-debian.md) | Standalone install on Ubuntu/Debian |
 | [docs/data-sources.md](docs/data-sources.md) | Which table/AMI action feeds which feature (+ fallbacks) |
 | [docs/security.md](docs/security.md) | Threat model, hardening checklist, what is deliberately out of scope |
