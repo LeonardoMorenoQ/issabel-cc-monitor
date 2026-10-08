@@ -71,18 +71,25 @@ admin with the CLI below).
 
 ## 7. Database schema + admin
 
+Load the env file safely (the `env $(grep … | xargs)` variant word-splits
+values containing spaces or quotes; this loader passes the file through
+bash's `set -a` instead). Paste once per shell:
+
 ```bash
-sudo -u ccmon env $(grep -v '^#' /etc/ccmon/ccmon.env | xargs) \
-  /opt/ccmon/.venv/bin/ccmon init-db
-sudo -u ccmon env $(grep -v '^#' /etc/ccmon/ccmon.env | xargs) \
-  /opt/ccmon/.venv/bin/ccmon create-admin --username admin --password 'STRONG_PASSWORD'
+run_ccmon() {
+  sudo -u ccmon bash -c 'set -a; . /etc/ccmon/ccmon.env; set +a; exec /opt/ccmon/.venv/bin/ccmon "$@"' _ "$@"
+}
+```
+
+```bash
+run_ccmon init-db
+run_ccmon create-admin --username admin --password 'STRONG_PASSWORD'
 ```
 
 Verify source connectivity:
 
 ```bash
-sudo -u ccmon env $(grep -v '^#' /etc/ccmon/ccmon.env | xargs) \
-  /opt/ccmon/.venv/bin/ccmon check
+run_ccmon check   # must exit 0 with source_ok=True
 ```
 
 ## 8. Dashboard build (optional but recommended)
