@@ -14,7 +14,7 @@ order; **stop at the first failing Verify** and use
 
 ```bash
 set -euo pipefail
-REPO=https://github.com/LeonardoMorenoQ/issabel-cc-monitor.git   # private: see Phase 2 note
+REPO=https://github.com/LeonardoMorenoQ/issabel-cc-monitor.git
 PBX=<the PBX hostname/IP>
 ```
 
@@ -106,7 +106,7 @@ httpd -M 2>/dev/null | grep -E 'proxy_module|proxy_http_module'  # both listed (
 ```bash
 sudo useradd --system --home /opt/ccmon --shell /usr/sbin/nologin ccmon
 sudo mkdir -p /opt/ccmon /etc/ccmon
-sudo git clone "$REPO" /opt/ccmon/src        # private repo: use a PAT in the URL or scp a tarball
+sudo git clone "$REPO" /opt/ccmon/src
 sudo cp -r /opt/ccmon/src/{ccmon,dashboard,pyproject.toml,requirements.lock,.env.example} /opt/ccmon/
 cd /opt/ccmon
 sudo "$PY" -m venv .venv
@@ -116,7 +116,7 @@ sudo .venv/bin/pip install --no-cache-dir .
 sudo chown -R ccmon:ccmon /opt/ccmon
 ```
 
-> **Private-repo alternative** (from your workstation, no PBX git credentials):
+> **No-git alternative** (from your workstation, when the PBX has no outbound git access):
 > `git archive --format=tar.gz -o ccmon-src.tgz HEAD` then
 > `scp ccmon-src.tgz root@$PBX:/tmp/` and on the PBX:
 > `sudo mkdir -p /opt/ccmon/src && sudo tar -C /opt/ccmon/src -xzf /tmp/ccmon-src.tgz`

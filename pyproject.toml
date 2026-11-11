@@ -7,6 +7,7 @@ name = "ccmon"
 version = "0.1.0"
 description = "Hardened monitoring layer for Issabel / Asterisk call-center operations"
 requires-python = ">=3.11"
+license = { text = "MIT" }
 dependencies = [
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",

@@ -12,6 +12,10 @@ this is an independent rewrite with different architecture and a hardened
 security posture (read-only sources, no secrets in the repo, no `chmod 777`,
 no `curl | bash` installer).
 
+![Live view in demo mode, synthetic data](docs/screenshot-live.jpg)
+
+*Live view running in demo mode. All queues, agents and numbers are synthetic.*
+
 ## Features
 
 - **Live view** (5 s polling): queues (waiting/active/SLA/wait/rolling
@@ -38,7 +42,8 @@ no `curl | bash` installer).
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.lock
-cp .env.example .env            # then edit: APP_MODE=demo
+cp .env.example .env            # then edit: APP_MODE=demo and
+                                # DATABASE_URL=sqlite:///./ccmon-demo.db (no PostgreSQL needed for the demo)
 ccmon seed-demo --yes           # demo admin + sample alert rules (APP DB only)
 APP_MODE=demo ccmon serve       # API + dashboard on http://127.0.0.1:8080/
 APP_MODE=demo ccmon collect     # in a second terminal: the collector loops
@@ -84,5 +89,5 @@ TLS reverse proxy in front.
 
 ## License / status
 
-Personal/internal project. Docker files under `deploy/docker/` are an
+MIT, see [LICENSE](LICENSE). Docker files under `deploy/docker/` are an
 optional secondary artifact; the supported install is bare systemd.

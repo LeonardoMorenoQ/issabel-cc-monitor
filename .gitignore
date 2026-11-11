@@ -18,3 +18,6 @@ dist/
 # node / dashboard
 node_modules/
 dashboard/dist/
+
+# local tool state
+.freebuff/
